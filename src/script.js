@@ -87,7 +87,11 @@ function playAnimation(index) {
 
 function recolorModel() {
   if (model) {
-    const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+    const newColor = new THREE.Color(
+      Math.random(),
+      Math.random(),
+      Math.random()
+    );
     model.traverse((child) => {
       if (child.isMesh) {
         child.material.color = newColor;
@@ -97,6 +101,31 @@ function recolorModel() {
 }
 
 document.getElementById("recolor-btn").addEventListener("click", recolorModel);
+
+function disappearModel() {
+  if (model) {
+    let visibleParts = [];
+    model.traverse((child) => {
+      if (child.isMesh) {
+        visibleParts.push(child);
+      }
+    });
+
+    const disappearInterval = setInterval(() => {
+      if (visibleParts.length > 0) {
+        const randomIndex = Math.floor(Math.random() * visibleParts.length);
+        visibleParts[randomIndex].visible = false;
+        visibleParts.splice(randomIndex, 1);
+      } else {
+        clearInterval(disappearInterval);
+      }
+    }, 100);
+  }
+}
+
+document
+  .getElementById("disappear-btn")
+  .addEventListener("click", disappearModel);
 
 animate = function () {
   requestAnimationFrame(animate);
