@@ -1,0 +1,24 @@
+# Node.js dependencies
+node_modules/
+
+# Parcel cache
+.parcel-cache/
+
+# Build output (если используется Parcel или другие сборщики)
+dist/
+build/
+
+# Локальные конфигурационные файлы
+.env
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Файлы IDE и редакторов
+.vscode/
+.idea/
+
+# macOS-specific files
+.DS_Store

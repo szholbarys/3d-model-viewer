@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Model Viewer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="scene-container"></div>
+    <div id="ui-container">
+      <input type="file" id="file-input" accept=".glb" />
+      <button id="recolor-btn">Recolor Model</button>
+      <button id="disappear-btn">Disappear Model</button>
+      <div><input type="checkbox" id="loop-animation" /> Loop Animation</div>
+    </div>
+    <div id="animation-list">Animation</div>
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
