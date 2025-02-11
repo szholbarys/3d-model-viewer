@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import anime from "animejs/lib/anime.es.js";
 
 let scene, camera, renderer, controls, model;
 let mixer,
@@ -135,3 +136,34 @@ animate = function () {
 };
 
 init();
+
+document.getElementById("file-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) loadModel(file);
+});
+
+anime({
+  targets: "#ui-container",
+  translateY: [-50, 0],
+  opacity: [0, 1],
+  duration: 1000,
+  easing: "easeOutElastic(1, .8)",
+});
+
+document.querySelectorAll("button").forEach((button) => {
+  button.addEventListener("mouseenter", (e) => {
+    anime({
+      targets: e.target,
+      scale: 1.1,
+      duration: 300,
+    });
+  });
+
+  button.addEventListener("mouseleave", (e) => {
+    anime({
+      targets: e.target,
+      scale: 1,
+      duration: 300,
+    });
+  });
+});
