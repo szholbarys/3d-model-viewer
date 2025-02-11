@@ -3,6 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 let scene, camera, renderer, controls, model;
+let mixer,
+  animations = [];
 
 function init() {
   scene = new THREE.Scene();
@@ -38,20 +40,56 @@ function loadModel(file) {
   const url = URL.createObjectURL(file);
 
   loader.load(url, (gltf) => {
-    if (model) scene.remove(model);
+    if (model) {
+      scene.remove(model);
+      if (mixer) {
+        mixer.stopAllAction();
+        mixer.uncacheRoot(model);
+      }
+    }
 
+    animations = [];
     model = gltf.scene;
     scene.add(model);
 
-    const box = new THREE.Box3().setFromObject(model);
-    const center = box.getCenter(new THREE.Vector3());
-    model.position.sub(center);
+    if (gltf.animations.length) {
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach((clip) => {
+        const action = mixer.clipAction(clip);
+        animations.push({ name: clip.name, action });
+      });
+      updateAnimationList();
+    }
   });
 }
 
-document.getElementById("file-input").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) loadModel(file);
-});
+function updateAnimationList() {
+  const list = document.getElementById("animation-list");
+  list.innerHTML = animations.length ? "" : "<p>Animation is not available</p>";
+
+  animations.forEach((anim, index) => {
+    const button = document.createElement("button");
+    button.textContent = anim.name;
+    button.onclick = () => playAnimation(index);
+    list.appendChild(button);
+  });
+}
+
+function playAnimation(index) {
+  animations.forEach((anim, i) => {
+    if (i === index) {
+      anim.action.reset().play();
+    } else {
+      anim.action.stop();
+    }
+  });
+}
+
+animate = function () {
+  requestAnimationFrame(animate);
+  if (mixer) mixer.update(0.016);
+  controls.update();
+  renderer.render(scene, camera);
+};
 
 init();
