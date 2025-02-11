@@ -85,6 +85,19 @@ function playAnimation(index) {
   });
 }
 
+function recolorModel() {
+  if (model) {
+    const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.material.color = newColor;
+      }
+    });
+  }
+}
+
+document.getElementById("recolor-btn").addEventListener("click", recolorModel);
+
 animate = function () {
   requestAnimationFrame(animate);
   if (mixer) mixer.update(0.016);
