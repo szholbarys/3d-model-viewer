@@ -3,9 +3,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import anime from "animejs/lib/anime.es.js";
 
-let scene, camera, renderer, controls, model;
-let mixer,
-  animations = [];
+let scene, camera, renderer, controls, mixer, model;
+let animations = [];
 
 function init() {
   scene = new THREE.Scene();
@@ -17,8 +16,6 @@ function init() {
     0.1,
     1000
   );
-  camera.position.z = 5;
-
   renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.getElementById("scene-container").appendChild(renderer.domElement);
@@ -26,12 +23,15 @@ function init() {
   const light = new THREE.AmbientLight(0xffffff, 4);
   scene.add(light);
 
+  camera.position.z = 5;
   controls = new OrbitControls(camera, renderer.domElement);
+
   animate();
 }
 
 function animate() {
   requestAnimationFrame(animate);
+  if (mixer) mixer.update(0.016);
   controls.update();
   renderer.render(scene, camera);
 }
@@ -57,28 +57,47 @@ function loadModel(file) {
       mixer = new THREE.AnimationMixer(model);
       gltf.animations.forEach((clip) => {
         const action = mixer.clipAction(clip);
-        animations.push({ name: clip.name, action });
+        animations.push({ name: clip.name, action: action });
       });
       updateAnimationList();
+    } else {
+      updateAnimationList();
     }
+
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(0, 0, maxDim * 2);
+    camera.lookAt(0, 0, 0);
+    controls.update();
   });
 }
 
 function updateAnimationList() {
   const list = document.getElementById("animation-list");
-  list.innerHTML = animations.length ? "" : "<p>Animation is not available</p>";
-
-  animations.forEach((anim, index) => {
-    const button = document.createElement("button");
-    button.textContent = anim.name;
-    button.onclick = () => playAnimation(index);
-    list.appendChild(button);
-  });
+  list.innerHTML = "";
+  if (animations.length === 0) {
+    list.innerHTML = "<p>Animation is not available</p>";
+  } else {
+    animations.forEach((anim, index) => {
+      const button = document.createElement("button");
+      button.textContent = anim.name;
+      button.onclick = () => playAnimation(index);
+      list.appendChild(button);
+    });
+  }
 }
 
 function playAnimation(index) {
+  const loopCheckbox = document.getElementById("loop-animation");
   animations.forEach((anim, i) => {
     if (i === index) {
+      anim.action.setLoop(
+        loopCheckbox.checked ? THREE.LoopRepeat : THREE.LoopOnce
+      );
       anim.action.reset().play();
     } else {
       anim.action.stop();
@@ -101,8 +120,6 @@ function recolorModel() {
   }
 }
 
-document.getElementById("recolor-btn").addEventListener("click", recolorModel);
-
 function disappearModel() {
   if (model) {
     let visibleParts = [];
@@ -124,23 +141,17 @@ function disappearModel() {
   }
 }
 
-document
-  .getElementById("disappear-btn")
-  .addEventListener("click", disappearModel);
-
-animate = function () {
-  requestAnimationFrame(animate);
-  if (mixer) mixer.update(0.016);
-  controls.update();
-  renderer.render(scene, camera);
-};
-
 init();
 
 document.getElementById("file-input").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (file) loadModel(file);
 });
+
+document.getElementById("recolor-btn").addEventListener("click", recolorModel);
+document
+  .getElementById("disappear-btn")
+  .addEventListener("click", disappearModel);
 
 anime({
   targets: "#ui-container",
@@ -158,7 +169,6 @@ document.querySelectorAll("button").forEach((button) => {
       duration: 300,
     });
   });
-
   button.addEventListener("mouseleave", (e) => {
     anime({
       targets: e.target,
@@ -166,4 +176,10 @@ document.querySelectorAll("button").forEach((button) => {
       duration: 300,
     });
   });
+});
+
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
