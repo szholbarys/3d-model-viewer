@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, model;
 
 function init() {
   scene = new THREE.Scene();
@@ -31,5 +32,26 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
 }
+
+function loadModel(file) {
+  const loader = new GLTFLoader();
+  const url = URL.createObjectURL(file);
+
+  loader.load(url, (gltf) => {
+    if (model) scene.remove(model);
+
+    model = gltf.scene;
+    scene.add(model);
+
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+  });
+}
+
+document.getElementById("file-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) loadModel(file);
+});
 
 init();
