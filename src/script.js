@@ -105,6 +105,13 @@ function playAnimation(index) {
   });
 }
 
+document.getElementById("loop-animation").addEventListener("change", () => {
+  if (!document.getElementById("loop-animation").checked) {
+    animations.forEach(anim => anim.action.stop());
+  }
+});
+
+
 function recolorModel() {
   if (model) {
     const newColor = new THREE.Color(
