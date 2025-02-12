@@ -15,6 +15,14 @@ git clone https://github.com/szholbarys/3d-model-viewer.git
 ```
 
 ```bash
+cd 3d-model-viewer
+```
+
+```bash
+npm i
+```
+
+```bash
 parcel ./src/index.html
 ```
 
